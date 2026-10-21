@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - RumahHub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo-container">
+            <img src="assets/logo.png" alt="Logo" class="logo">
+            <span class="brand-title">RUMAHHUB</span>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="login.html" id="btnKeluar">Keluar (Logout)</a>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <div class="dashboard-container">
+            <!-- Sidebar Navigasi -->
+            <aside class="sidebar">
+                <div class="user-profile">
+                    <img src="assets/icon_profile.png" alt="Profile" id="fotoAdmin">
+                    <div>
+                        <h4>Selamat datang,</h4>
+                        <span>Admin RumahHub</span>
+                    </div>
+                </div>
+                <div class="sidebar-menu">
+                    <a href="daftar_properti/daftarproperti.html" class="menu-item">
+                        <img src="assets/icon_daftar_properti.png" alt="Icon"> Daftar Properti
+                    </a>
+                    <a href="favorit.html" class="menu-item">
+                        <img src="assets/icon_favorit.png" alt="Icon"> Favorit
+                    </a>
+                    <a href="pesanan/pesanan.html" class="menu-item">
+                        <img src="assets/icon_pesanan.png" alt="Icon"> Pesanan
+                    </a>
+                    <a href="pengaturan.html" class="menu-item">
+                        <img src="assets/icon_pengaturan.png" alt="Icon"> Pengaturan
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Konten Utama Dashboard -->
+            <section class="dashboard-content">
+                <div class="dashboard-header">
+                    <h2>Dashboard Utama RumahHub</h2>
+                    <p>Kelola sistem dan preferensi tampilan dashboard secara interaktif.</p>
+                </div>
+
+                <div class="table-card" style="padding: 25px;">
+                    <h3>Pengaturan Mode & Quick Action:</h3>
+                    
+                    <!-- Event 1: Change Event pada Dropdown Tema -->
+                    <div style="margin: 15px 0;">
+                        <label for="pilihTema" style="font-weight: 500;">Pilih Mode Tampilan Dashboard: </label>
+                        <select id="pilihTema" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e0;">
+                            <option value="light">Mode Terang (Default)</option>
+                            <option value="dark">Mode Gelap (Dark Mode)</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter / Quick Action -->
+                    <button id="btnBukaCatatan" style="padding: 8px 16px; background: #3182ce; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">+ Tambah Catatan Admin</button>
+                    
+                    <div id="kotakCatatan" style="margin-top: 15px; padding: 12px; background: #e2e8f0; border-radius: 6px; display: none;">
+                        <b>Catatan Tersimpan:</b> <span id="teksCatatan">-</span>
+                    </div>
+
+                    <p id="infoServer" style="margin-top: 20px; font-size: 0.85rem; color: #4a5568;"></p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 RumahHub - Katalog Hunian & Properti</p>
+    </footer>
+
+    <!-- SCRIPT JAVASCRIPT REVISI DASHBOARD -->
+    <script>
+    
+        // 1. POPUP BOX 1: Prompt Box untuk Tambah Catatan Admin
+  
+        const btnBukaCatatan = document.getElementById("btnBukaCatatan");
+        btnBukaCatatan.addEventListener("click", function() {
+            // POPUP 1: PROMPT BOX
+            let catatan = prompt("Masukkan catatan pengingat harian Admin:", "Periksa berkas pengajuan properti hari ini");
+            
+            if (catatan && catatan.trim() !== "") {
+                document.getElementById("kotakCatatan").style.display = "block";
+                document.getElementById("teksCatatan").innerText = catatan;
+
+                // Web Storage (Session Storage)
+                if (typeof(Storage) !== "undefined") {
+                    sessionStorage.setItem("catatanAdmin", catatan);
+                }
+            }
+        });
+
+
+     
+        // 2. MULTIPLE EVENTS (EVENT TERBARU)
+
+        // EVENT 1: change Event (Mengubah tema tampilan secara langsung)
+        const pilihTema = document.getElementById("pilihTema");
+        pilihTema.addEventListener("change", function() {
+            let mode = this.value;
+            const container = document.querySelector(".dashboard-container");
+            
+            if (mode === "dark") {
+                container.style.backgroundColor = "#2d3748";
+                container.style.color = "#ffffff";
+            } else {
+                container.style.backgroundColor = "#ffffff";
+                container.style.color = "#333333";
+            }
+
+            // Web Storage (Local Storage)
+            if (typeof(Storage) !== "undefined") {
+                localStorage.setItem("temaDashboard", mode);
+            }
+        });
+
+        // EVENT 2: click Event dengan POPUP BOX 2 (Confirm Box untuk Logout)
+        const btnKeluar = document.getElementById("btnKeluar");
+        btnKeluar.addEventListener("click", function(e) {
+            // POPUP 2: CONFIRM BOX
+            let yakin = confirm("Apakah Anda yakin ingin keluar dari Dashboard Admin?");
+            if (!yakin) {
+                e.preventDefault(); // Batalkan navigasi jika diklik Cancel
+            }
+        });
+
+        // EVENT 3: contextmenu Event (Mencegah atau memberikan konfirmasi klik kanan pada foto profil)
+        const fotoAdmin = document.getElementById("fotoAdmin");
+        fotoAdmin.addEventListener("contextmenu", function(e) {
+            e.preventDefault(); // Mencegah menu konteks bawaan browser
+            alert("Akses opsi foto profil dikunci oleh Sistem Keamanan RumahHub!");
+        });
+
+
+        // 3. ASYNCHRONOUS, PROMISE & FETCH API
+
+        // Load awal data dari Web Storage & Promise
+        window.addEventListener("load", function() {
+            // Cek session storage catatan
+            if (typeof(Storage) !== "undefined") {
+                let savedNote = sessionStorage.getItem("catatanAdmin");
+                if (savedNote) {
+                    document.getElementById("kotakCatatan").style.display = "block";
+                    document.getElementById("teksCatatan").innerText = savedNote;
+                }
+            }
+
+            // Simulasi Promise Async
+            new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve("Status Server: Aktif & Terhubung");
+                }, 1000);
+            }).then(msg => {
+                document.getElementById("infoServer").innerText = msg;
+            });
+        });
+
+        // Fetch API
+        fetch('https://jsonplaceholder.typicode.com/users/1')
+            .then(res => res.json())
+            .then(data => console.log("Fetch Server Berhasil:", data.name))
+            .catch(err => console.error(err));
+    </script>
+</body>
+</html> 
